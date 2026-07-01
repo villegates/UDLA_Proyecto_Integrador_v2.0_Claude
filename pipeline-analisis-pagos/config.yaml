@@ -1,0 +1,14 @@
+# Configuration parameters for the Olist Payment Analysis Pipeline
+
+rutas:
+  # Fuentes de datos de origen (Mapeadas de forma estricta para src/extract.py)
+  origen_payments: "data/olist_order_payments_dataset.csv"
+  origen_orders: "data/olist_orders_dataset.csv"
+  origen_customers: "data/olist_customers_dataset.csv"
+
+  # Destino del reporte consolidado de salida
+  salida_reporte: "output/reporte_metodos_pago.csv"
+
+parametros:
+  intentos_backoff: 3
+  espera_inicial: 0.5
