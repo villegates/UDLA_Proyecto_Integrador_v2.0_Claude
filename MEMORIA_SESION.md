@@ -105,6 +105,9 @@ Además se escribió **`GUION_PRESENTACION.md`** (script de 15 min con reparto d
   - `GUION_PRESENTACION.md` (guion detallado, 15 min)
   - `GUION_RESUMEN.md` (versión express de 1 página, para tener al lado al presentar)
   - `MEMORIA_SESION.md` (este archivo)
+  - `README.md` + `.gitignore` (para el repositorio)
+
+**📦 Repositorio GitHub (privado):** https://github.com/villegates/UDLA_Proyecto_Integrador_v2.0_Claude — todo el contenido de `Claude\` está publicado en la rama `main`.
 
 Los **fuentes/originales** quedan en `...\Modulo 2\`: `Rubrica_Proyecto_Integrador.html`, `Template_Presentacion_Final.html/.pptx`, y los `.rar` fuente (`pipeline-analisis-pagos.rar` = v1; `Tarea_v2.0\pipeline-analisis-pagos_final.rar` = v2). El 30-jun se **borraron los duplicados**: la extracción v1 (con su venv, 169 MB) y las copias de trabajo en `Tarea_v2.0\` (proyecto + presentación), que ya estaban en `Claude\`.
 
