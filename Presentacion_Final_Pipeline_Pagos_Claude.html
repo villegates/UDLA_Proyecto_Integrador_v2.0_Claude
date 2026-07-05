@@ -191,13 +191,11 @@
     <section class="slide l1">
       <div class="logo"><svg class="udla-logo-svg" role="img" aria-label="UDLA"><use href="#udla-logo"/></svg></div>
       <div class="clase anim">Proyecto Integrador · DPL1046</div>
-      <h1 class="ttl anim">Análisis de Métodos de Pago en Olist</h1>
-      <div class="sub anim">Pablo Villegas · Genesis</div>
+      <h1 class="ttl anim">Pipeline de Analítica y Auditoría de Métodos de Pago</h1>
+      <div class="sub anim">Mijael Inostroza · Ashley Toloza · Felipe Vallejos · Pablo Villegas</div>
       <div class="meta anim">Diplomado en Ingeniería de Datos con Python · UDLA · 07-07-2026 · Dataset: Olist</div>
       <div class="barbottom"></div>
     </section>
-
-    <!-- (slide-guía del template eliminada para la versión final) -->
 
     <!-- 3 · DIVISOR PROBLEMA -->
     <section class="slide l2">
@@ -216,14 +214,14 @@
           <div class="col-l">
             <div class="subh anim">El contexto</div>
             <ul class="bul">
-              <li class="anim">Olist procesa <b>+100.000 pagos</b>, pero no sabe con qué métodos ni en qué regiones paga su gente.</li>
-              <li class="anim"><b>Comercial y Finanzas</b> lo necesitan para negociar medios de pago y gestionar el riesgo del crédito.</li>
-              <li class="anim">Permite decidir dónde ofrecer <b>boleto vs. tarjeta</b> y cómo dimensionar las cuotas.</li>
+              <li class="anim">¿Qué método de pago prefieren los clientes de Olist, cuánto recaudan y cuántas órdenes en estado crítico (no disponibles) ponen flujo de caja en riesgo?</li>
+              <li class="anim">Sin este control, la empresa pierde visibilidad sobre las comisiones de cada pasarela de pago y sobre en qué estados se concentra su flujo de caja.</li>
+              <li class="anim">Permite decidir en qué método de pago negociar mejores comisiones y qué estados/órdenes requieren seguimiento operativo.</li>
             </ul>
           </div>
           <div class="col-r anim">
             <div class="big">En una frase</div>
-            <div class="small">Un programa que convierte los datos crudos de pagos de Olist en un <b>reporte automático y confiable</b> de cómo, cuánto y dónde pagan los clientes.</div>
+            <div class="small">Construimos un pipeline que centraliza, limpia y audita los pagos de Olist para mostrar de dónde viene la plata y dónde se está perdiendo.</div>
           </div>
         </div>
       </div>
@@ -240,12 +238,13 @@
         <table class="brand anim">
           <thead><tr><th>Fuente / Tabla</th><th>Qué aporta</th><th>Filas aprox.</th></tr></thead>
           <tbody>
-            <tr><td>olist_order_payments_dataset</td><td>Método, valor y N.º de cuotas de cada pago</td><td>103.886</td></tr>
-            <tr><td>olist_orders_dataset</td><td>Estado de la orden (para excluir canceladas)</td><td>99.441</td></tr>
-            <tr><td>olist_customers_dataset</td><td>Estado geográfico del cliente (customer_state)</td><td>99.441</td></tr>
+            <tr><td>olist_order_payments_dataset</td><td>Tipo de pago, cuotas y monto por orden</td><td>103,886</td></tr>
+            <tr><td>olist_orders_dataset</td><td>Estado de la orden (delivered, canceled, unavailable) y llave para cruzar</td><td>99,441</td></tr>
+            <tr><td>olist_customers_dataset</td><td>Estado (customer_state) del cliente para el análisis geográfico</td><td>99,441</td></tr>
+            <tr><td>API mindicador.cl (externa)</td><td>Tipo de cambio USD→CLP en tiempo real, con fallback si no responde</td><td>1 valor / día</td></tr>
           </tbody>
         </table>
-        <div class="quote anim">Integramos <b>3 tablas</b> de Olist (supera el mínimo de 2), cruzadas por <code>order_id</code> y <code>customer_id</code>.</div>
+        <div class="quote anim">3 tablas locales de Olist (~300k filas en total) + 1 API externa en vivo.</div>
       </div>
       <div class="foot-prog">Proyecto Integrador · DPL1046</div>
       <div class="foot-num"></div>
@@ -266,11 +265,11 @@
       <div class="logo"><svg class="udla-logo-svg" role="img" aria-label="UDLA"><use href="#udla-logo"/></svg></div>
       <div class="body">
         <div class="cards">
-          <div class="card anim"><div class="ic">📥</div><div class="t">1 · Ingesta</div><div class="d"><code>extract.py</code>: lee 3 CSV con reintentos y <b>backoff exponencial</b>; valida un <b>contrato de datos</b> (assert) y aísla filas corruptas.</div></div>
-          <div class="card anim"><div class="ic">🔧</div><div class="t">2 · Transformación</div><div class="d"><code>transform.py</code> + <code>pipeline.py</code>: filtra pagos inválidos y canceladas, une tablas (<b>merge</b>) y agrega por método y estado (<b>groupby, crosstab</b>).</div></div>
-          <div class="card anim"><div class="ic">📤</div><div class="t">3 · Salida</div><div class="d"><code>main.py</code>: CSV consolidado por estado × método + <b>reporte ejecutivo</b> en consola con 3 hallazgos.</div></div>
+          <div class="card anim"><div class="ic">📥</div><div class="t">1 · Ingesta</div><div class="d">Lee 3 CSV locales de Olist con reintentos automáticos + consulta la API de mindicador.cl para el tipo de cambio.</div></div>
+          <div class="card anim"><div class="ic">🔧</div><div class="t">2 · Transformación</div><div class="d">Aísla pagos con montos ≤0 o cuotas <1, excluye órdenes canceladas, valida contratos de datos con asserts y cruza payments + orders + customers.</div></div>
+          <div class="card anim"><div class="ic">📤</div><div class="t">3 · Salida</div><div class="d">4 reportes CSV (resumen por estado, por método de pago, matriz cruzada, órdenes críticas) + una base SQLite consultable.</div></div>
         </div>
-        <div class="quote anim">Arquitectura por capas · config externa en YAML · logging · tests · idempotente. Todo corre <b>local en Python</b> con un comando — sin nube.</div>
+        <div class="quote anim">Todo corre 100% local en Python (VS Code), un solo comando: python main.py.</div>
       </div>
       <div class="foot-prog">Proyecto Integrador · DPL1046</div>
       <div class="foot-num"></div>
@@ -285,15 +284,17 @@
         <div class="twocol">
           <div class="col-l">
             <ul class="bul sm">
-              <li class="anim"><b>Validación:</b> contrato con <code>assert</code> (columnas, tipos, montos ≥ 0, cuotas ≥ 1); las filas malas se aíslan.</li>
-              <li class="anim"><b>Errores:</b> <code>try/except</code> específicos por capa + <b>logging</b> con niveles (loguru), no <code>print</code>.</li>
-              <li class="anim"><b>Seguridad:</b> sin credenciales; parámetros en <code>config.yaml</code>, fuera del código (secretos → variables de entorno).</li>
-              <li class="anim"><b>Tests:</b> 5 pruebas <code>pytest</code> (transformación + análisis), con casos de borde y un caso negativo.</li>
+              <li class="anim"><b>Validación:</b> contratos de datos con asserts (columnas obligatorias, montos ≥0, cuotas ≥1, order_id sin duplicados) que aíslan filas corruptas antes de analizar.</li>
+              <li class="anim"><b>Manejo de errores:</b> try/except con reintentos en la lectura de CSV y en la API, más un valor de fallback (180 CLP) si la API externa falla.</li>
+              <li class="anim"><b>Seguridad:</b> configuración sensible fuera del código, cargada desde .env con python-dotenv (nunca hardcodeada en los scripts) y excluida del repositorio vía .gitignore.</li>
+              <li class="anim"><b>Reproducibilidad:</b> rutas relativas vía config.yaml (nada hardcodeado) + requirements.txt para reconstruir el entorno con un comando.</li>
+              <li class="anim"><b>Idempotencia:</b> si el reporte ya existe, el pipeline se detiene sin reprocesar ni gastar cómputo de más.</li>
+              <li class="anim"><b>Tests:</b> 3 tests con pytest sobre la capa de transformación, cubriendo casos de borde reales.</li>
             </ul>
           </div>
           <div class="col-r anim">
-            <div class="big">Tests en verde</div>
-            <div class="small" style="font-family:monospace;font-size:12px;line-height:1.5;">✅ <b>5 passed in 1.12s</b><br><code>python -m pytest -v</code><br>aislamiento_datos_sucios ✔<br>filtrado_ordenes_canceladas ✔<br>comportamiento_tipos_y_columnas ✔<br>contratos_rechazan_datos_invalidos ✔<br>generar_analisis_pagos ✔</div>
+            <div class="big">3 tests ✅</div>
+            <div class="small" style="font-family:monospace;font-size:12px;line-height:1.6;color:#2e7d32;">test_aislamiento_datos_sucios <b>PASSED</b><br>test_filtrado_ordenes_canceladas <b>PASSED</b><br>test_comportamiento_tipos_y_columnas <b>PASSED</b><br><br><b>3 passed in 0.72s</b></div>
           </div>
         </div>
       </div>
@@ -316,11 +317,11 @@
       <div class="logo"><svg class="udla-logo-svg" role="img" aria-label="UDLA"><use href="#udla-logo"/></svg></div>
       <div class="body">
         <ul class="bul">
-          <li class="anim">Un comando: <code>python main.py</code> corre ingesta → validación → transformación → salida.</li>
-          <li class="anim">En vivo: <b>reintentos/backoff</b>, aislamiento de <b>11 filas sucias</b> y exclusión de <b>625 canceladas</b>.</li>
-          <li class="anim">Genera el CSV en <code>output/</code> y el <b>reporte</b>: tabla nacional + matriz de 27 estados.</li>
+          <li class="anim"><code>python main.py</code> → extrae 3 CSV + tipo de cambio, valida, transforma y exporta los 5 outputs en segundos.</li>
+          <li class="anim">Segunda corrida: <b>"El reporte ejecutivo ya existe... se detiene de forma segura"</b> — idempotencia real, no recalcula ni gasta cómputo de más.</li>
+          <li class="anim"><code>python -m pytest tests/ -v</code> → 3 tests en verde en 0.72 segundos.</li>
         </ul>
-        <div class="quote anim">Respaldo: si la demo en vivo falla, tenemos capturas del reporte en consola y del CSV generado.</div>
+        <div class="quote anim">El pipeline necesita internet para el tipo de cambio; si la API falla, usa el fallback de 180 CLP automáticamente.</div>
       </div>
       <div class="foot-prog">Proyecto Integrador · DPL1046</div>
       <div class="foot-num"></div>
@@ -344,14 +345,14 @@
           <div class="col-l">
             <div class="subh anim">Hallazgos principales</div>
             <ul class="bul">
-              <li class="anim"><b>credit_card domina:</b> 73,97% de las transacciones y el ticket más alto ($163).</li>
-              <li class="anim"><b>Se financia en cuotas:</b> 3,5 promedio en tarjeta → alta dependencia del crédito.</li>
-              <li class="anim"><b>La geografía manda:</b> Amazonas 80,5% tarjeta vs. Roraima 28,9% boleto.</li>
+              <li class="anim">São Paulo lidera el volumen de ingresos de toda la plataforma, muy por sobre el resto de los 27 estados.</li>
+              <li class="anim">La tarjeta de crédito domina absolutamente: 76.349 transacciones, un 78,4% del monto total recaudado.</li>
+              <li class="anim">Detectamos 640 órdenes en estado crítico <b>unavailable</b> (no disponibles), flujo de caja en riesgo que queda aislado en un reporte aparte para seguimiento operativo; las órdenes canceladas se excluyen antes del análisis para no inflar las métricas de ingreso.</li>
             </ul>
           </div>
           <div class="col-r anim">
-            <div class="big">Dato clave</div>
-            <div class="small"><span style="font-size:44px;font-weight:800;color:var(--orange);font-family:'Barlow Condensed',var(--font);">73,97%</span><br>Casi <b>3 de cada 4 pagos</b> en Olist son con tarjeta de crédito.</div>
+            <div class="big" style="font-size:48px;">78,4%</div>
+            <div class="small" style="font-size:16px;">del monto total pagado en la plataforma pasa por<br><b>tarjeta de crédito</b><br>(76.349 transacciones).<br><br>Estado líder:<br><b>São Paulo</b></div>
           </div>
         </div>
       </div>
@@ -365,30 +366,26 @@
       <div class="header-bar black"><h2>Visualización de resultados</h2></div>
       <div class="logo"><svg class="udla-logo-svg" role="img" aria-label="UDLA"><use href="#udla-logo"/></svg></div>
       <div class="body">
-        <div class="anim" style="height:82%;display:flex;flex-direction:column;justify-content:center;gap:15px;padding:6px 18px;">
-          <div style="font-size:15px;color:var(--dgray);font-weight:600;">Participación nacional por método de pago (% de transacciones)</div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div style="width:118px;font-weight:700;color:var(--black);">credit_card</div>
-            <div style="flex:1;background:#efe7df;border-radius:6px;height:30px;"><div style="width:100%;background:var(--orange);height:100%;border-radius:6px;"></div></div>
-            <div style="width:74px;text-align:right;font-weight:800;color:var(--orange);font-size:19px;">73,97%</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div style="width:118px;font-weight:700;color:var(--black);">boleto</div>
-            <div style="flex:1;background:#efe7df;border-radius:6px;height:30px;"><div style="width:25.8%;background:rgba(255,107,26,.72);height:100%;border-radius:6px;"></div></div>
-            <div style="width:74px;text-align:right;font-weight:800;color:var(--orange);font-size:19px;">19,08%</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div style="width:118px;font-weight:700;color:var(--black);">voucher</div>
-            <div style="flex:1;background:#efe7df;border-radius:6px;height:30px;"><div style="width:7.4%;background:rgba(255,107,26,.5);height:100%;border-radius:6px;"></div></div>
-            <div style="width:74px;text-align:right;font-weight:800;color:var(--orange);font-size:19px;">5,48%</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div style="width:118px;font-weight:700;color:var(--black);">debit_card</div>
-            <div style="flex:1;background:#efe7df;border-radius:6px;height:30px;"><div style="width:2%;background:rgba(255,107,26,.38);height:100%;border-radius:6px;"></div></div>
-            <div style="width:74px;text-align:right;font-weight:800;color:var(--orange);font-size:19px;">1,47%</div>
-          </div>
-          <div style="font-size:12.5px;color:var(--caption);margin-top:2px;">Fuente: olist_order_payments × orders (sin canceladas) · 103.214 transacciones válidas</div>
+        <div style="height:78%;border:2px solid #ffd0b0;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,107,26,.04);padding:20px 40px;" class="anim">
+          <svg viewBox="0 0 1000 380" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;max-width:900px;">
+            <text x="0" y="45" font-family="Barlow, sans-serif" font-size="19" font-weight="700" fill="#1A1A1A">Tarjeta de crédito</text>
+            <rect x="230" y="15" width="620" height="52" rx="8" fill="#FF6B1A"/>
+            <text x="865" y="49" font-family="Barlow, sans-serif" font-size="20" font-weight="800" fill="#FF6B1A">78,4%</text>
+
+            <text x="0" y="135" font-family="Barlow, sans-serif" font-size="19" font-weight="700" fill="#1A1A1A">Boleto</text>
+            <rect x="230" y="105" width="142" height="52" rx="8" fill="#FFC49A"/>
+            <text x="387" y="139" font-family="Barlow, sans-serif" font-size="20" font-weight="800" fill="#c9870a">18,0%</text>
+
+            <text x="0" y="225" font-family="Barlow, sans-serif" font-size="19" font-weight="700" fill="#1A1A1A">Voucher</text>
+            <rect x="230" y="195" width="18" height="52" rx="6" fill="#FFD9BE"/>
+            <text x="263" y="229" font-family="Barlow, sans-serif" font-size="20" font-weight="800" fill="#aa6a3a">2,2%</text>
+
+            <text x="0" y="315" font-family="Barlow, sans-serif" font-size="19" font-weight="700" fill="#1A1A1A">Tarjeta débito</text>
+            <rect x="230" y="285" width="11" height="52" rx="6" fill="#FFE4CE"/>
+            <text x="256" y="319" font-family="Barlow, sans-serif" font-size="20" font-weight="800" fill="#aa6a3a">1,4%</text>
+          </svg>
         </div>
+        <div style="text-align:center;font-size:13px;color:#bb8a6a;margin-top:6px;" class="anim">% del monto total pagado (CLP) por método · fuente: output/pagos_por_metodo.csv</div>
       </div>
       <div class="foot-prog">Proyecto Integrador · DPL1046</div>
       <div class="foot-num"></div>
@@ -403,14 +400,14 @@
         <div class="twocol">
           <div class="col-l">
             <ul class="bul sm">
-              <li class="anim"><b>En qué ayudó:</b> andamiaje de funciones, manejo de excepciones y depurar/refactorizar (p. ej. el CSV perdía el método de pago).</li>
-              <li class="anim"><b>Qué revisamos:</b> cada <code>assert</code>, la lógica del hallazgo geográfico y los tests contra el contrato.</li>
-              <li class="anim"><b>Qué entendimos:</b> merge, groupby, crosstab, backoff, contratos y pytest — explicamos cada decisión.</li>
+              <li class="anim"><b>En qué nos ayudó:</b> generar el boilerplate de logging con loguru, armar los asserts del contrato de datos y redactar la estructura inicial de los 3 tests con pytest.</li>
+              <li class="anim"><b>Qué revisamos:</b> la IA proponía leer los parámetros del YAML asumiendo una sola estructura fija; lo corregimos con una función de búsqueda segura que revisa primero la sección anidada (<code>config["api"]["factor_brl_usd"]</code>) y si no está, cae a la raíz, para que no se rompa si alguien reordena el archivo.</li>
+              <li class="anim"><b>Qué entendimos:</b> cada integrante puede explicar cómo se valida un pago, por qué se excluyen las órdenes canceladas y cómo se arma cada uno de los 5 outputs.</li>
             </ul>
           </div>
           <div class="col-r anim">
             <div class="big">Copiloto, no piloto</div>
-            <div class="small">La IA aceleró el código; la <b>arquitectura, las decisiones y la validación son nuestras</b>. Cada parte la revisamos y la sabemos explicar.</div>
+            <div class="small">La IA nos ayudó a escribir y depurar código más rápido, pero cada decisión de negocio (qué excluir, qué validar, qué reportar) la tomamos nosotros y podemos explicarla en las preguntas.</div>
           </div>
         </div>
       </div>
@@ -433,11 +430,11 @@
       <div class="logo"><svg class="udla-logo-svg" role="img" aria-label="UDLA"><use href="#udla-logo"/></svg></div>
       <div class="body">
         <div class="cards">
-          <div class="card anim"><div class="ic">💡</div><div class="t">Decisión que habilita</div><div class="d">Negociar comisiones con proveedores de tarjeta (73% del volumen) y ofrecer boleto donde más se usa (norte/nordeste).</div></div>
-          <div class="card anim"><div class="ic">⏱️</div><div class="t">Tiempo / costo ahorrado</div><div class="d">Reemplaza el análisis manual en Excel: de horas de tablas dinámicas a un reporte reproducible con un comando.</div></div>
-          <div class="card anim"><div class="ic">📈</div><div class="t">Siguiente paso</div><div class="d">Escalar a una base de datos, agendar el pipeline (cron/Airflow) e incorporar tendencia temporal y reseñas.</div></div>
+          <div class="card anim"><div class="ic">💡</div><div class="t">Decisión que habilita</div><div class="d">Priorizar la negociación de comisiones con la pasarela de tarjeta de crédito, que concentra el 78% del dinero que mueve la plataforma.</div></div>
+          <div class="card anim"><div class="ic">⏱️</div><div class="t">Tiempo / costo ahorrado</div><div class="d">Reemplaza el cruce manual en Excel de 3 tablas y ~200k filas: hoy corre en segundos con un solo comando.</div></div>
+          <div class="card anim"><div class="ic">📈</div><div class="t">Siguiente paso</div><div class="d">Programar el pipeline con un scheduler (cron / Airflow), mover la salida a un data warehouse en la nube y usar una API que convierta BRL→CLP directamente, sin pasar por USD como intermediario.</div></div>
         </div>
-        <div class="quote anim">El <b>73,97% de crédito con 3,5 cuotas</b> nos dice dónde está el riesgo y la oportunidad: financiamiento y fidelización.</div>
+        <div class="quote anim">De datos crudos de pago a una decisión concreta: dónde negociar comisiones y qué órdenes vigilar.</div>
       </div>
       <div class="foot-prog">Proyecto Integrador · DPL1046</div>
       <div class="foot-num"></div>
@@ -449,10 +446,10 @@
       <div class="header-bar black"><h2>Aprendizajes del equipo</h2></div>
       <div class="logo"><svg class="udla-logo-svg" role="img" aria-label="UDLA"><use href="#udla-logo"/></svg></div>
       <div class="body">
-        <ul class="bul">
-          <li class="anim"><b>Lo más difícil:</b> pasar de un script suelto a un pipeline modular con contratos, tests e idempotencia.</li>
-          <li class="anim"><b>Lo que haríamos distinto:</b> escribir los tests desde el inicio (TDD) y externalizar la config antes.</li>
-          <li class="anim"><b>Lo que nos llevamos:</b> cómo se construye software de datos reproducible, validado y explicable.</li>
+        <ul class="bul sm">
+          <li class="anim"><b>Lo más difícil:</b> mantener consistente la conversión de moneda (USD→CLP y el factor BRL) y la nomenclatura de columnas entre las capas de extracción, transformación y análisis del pipeline.</li>
+          <li class="anim"><b>Lo que haríamos distinto:</b> agregar un .gitignore desde el día uno para no versionar datos crudos ni el archivo .env, y sumar tests también para las capas de extracción y de análisis, no solo para transformación.</li>
+          <li class="anim"><b>Lo que nos llevamos:</b> el valor de diseñar bajo un enfoque de desarrollo modular orquestado por un <code>main.py</code> central. Esta arquitectura no solo nos dio control absoluto sobre el flujo de datos, la idempotencia y las auditorías SQL directas, sino que deja el sistema desacoplado y preparado para escalar más allá del ETL tradicional. Gracias a esta estructura, la solución queda lista para incorporar a futuro módulos de analítica predictiva (Machine Learning), reportería automatizada o visualización interactiva sin alterar las reglas de negocio existentes.</li>
         </ul>
       </div>
       <div class="foot-prog">Proyecto Integrador · DPL1046</div>
@@ -464,7 +461,7 @@
     <section class="slide l1 slide-closing">
       <div class="logo"><svg class="udla-logo-svg" role="img" aria-label="UDLA"><use href="#udla-logo"/></svg></div>
       <h1 class="ttl closing anim">Gracias · ¿Preguntas?</h1>
-      <div class="closing-sub anim">Pablo Villegas · Genesis — Proyecto Integrador DPL1046</div>
+      <div class="closing-sub anim">Mijael Inostroza · Ashley Toloza · Felipe Vallejos · Pablo Villegas</div>
       <div class="meta anim">DPL1046 · Proyecto Integrador · Diplomado en Ingeniería de Datos con Python · UDLA · 2026</div>
       <div class="barbottom"></div>
     </section>

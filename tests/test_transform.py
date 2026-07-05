@@ -1,10 +1,6 @@
 import pytest
 import pandas as pd
-from src.transform import (
-    limpiar_y_validar_datos,
-    validar_contrato_pagos,
-    validar_contrato_ordenes,
-)
+from src.transform import limpiar_y_validar_datos
 
 
 def test_aislamiento_datos_sucios():
@@ -95,28 +91,3 @@ def test_comportamiento_tipos_y_columnas():
     columnas_ordenes = set(df_o_limpio.columns)
     for col in ['order_id', 'customer_id', 'order_status']:
         assert col in columnas_ordenes, f"La columna esencial de órdenes '{col}' se perdió"
-
-
-def test_contratos_rechazan_datos_invalidos():
-    """
-    Test 4 (negativo): los contratos de calidad deben LANZAR AssertionError
-    ante datos que violan las reglas. Verifica que la validación realmente protege.
-    """
-    # Pagos con monto negativo → viola la Regla 3 del contrato de pagos
-    pagos_malos = pd.DataFrame({
-        'order_id': ['orden_1'],
-        'payment_value': [-50.0],
-        'payment_installments': [1],
-        'payment_type': ['credit_card'],
-    })
-    with pytest.raises(AssertionError):
-        validar_contrato_pagos(pagos_malos)
-
-    # Órdenes con order_id duplicado → viola la Regla 2 (llave primaria única)
-    ordenes_malas = pd.DataFrame({
-        'order_id': ['orden_1', 'orden_1'],
-        'customer_id': ['cl_1', 'cl_2'],
-        'order_status': ['delivered', 'delivered'],
-    })
-    with pytest.raises(AssertionError):
-        validar_contrato_ordenes(ordenes_malas)

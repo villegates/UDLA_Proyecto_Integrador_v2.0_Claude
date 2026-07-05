@@ -1,20 +1,8 @@
-# Python
+.env
+output/
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
 .pytest_cache/
-.venv/
-venv/
-env/
-
-# Salidas generadas por el pipeline (output/ se llena al correr; solo versionamos .gitkeep)
-pipeline-analisis-pagos/output/*
-!pipeline-analisis-pagos/output/.gitkeep
-
-# Sistema operativo / editores
-.DS_Store
-Thumbs.db
-desktop.ini
+pipeline.log
 .Rhistory
-.vscode/
-.idea/
+.venv/
